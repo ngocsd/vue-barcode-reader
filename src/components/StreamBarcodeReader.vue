@@ -1,128 +1,119 @@
 <template>
+  <div>
     <div class="scanner-container">
-        <div v-show="!isLoading">
-            <video poster="data:image/gif,AAAA" ref="scanner"></video>
-            <div class="overlay-element"></div>
-            <div class="laser"></div>
-        </div>
+      <div style="position: relative">
+        <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
+        <div class="overlay-element"></div>
+        <div class="laser"></div>
+      </div>
     </div>
+    {{ msg }}<br>
+    histories:
+    <ul>
+      <li v-for="item of histories"> {{ item }}</li>
+    </ul>
+  </div>
 </template>
 
 <script>
-import { BrowserMultiFormatReader, Exception, BrowserQRCodeReader, DecodeHintType} from "@zxing/library";
+import {qr} from '../service/decoder';
 
 export default {
-    name: "stream-barcode-reader",
-
-    data() {
-        return {
-            isLoading: true,
-            codeReader: new BrowserMultiFormatReader(),
-            isMediaStreamAPISupported:
-                navigator &&
-                navigator.mediaDevices &&
-                "enumerateDevices" in navigator.mediaDevices
-        };
-    },
-
-    mounted() {
-        if (!this.isMediaStreamAPISupported) {
-            throw new Exception("Media Stream API is not supported");
-            return;
-        }
-        // const a = new BrowserQRCodeReader();
-        // a.decodeFromVideoDevice()
-        this.start();
-        this.$refs.scanner.oncanplay = event => {
-            this.isLoading = false;
-            this.$emit("loaded");
-        };
-    },
-
-    beforeDestroy() {
-        this.codeReader.reset();
-    },
-
-    methods: {
-        start() {
-            this.codeReader.decodeFromVideoDevice(
-                undefined,
-                this.$refs.scanner,
-                (result, err) => {
-                    if (result) {
-                        this.$emit("decode", result.text);
-                    }
-                }
-            );
-        }
+  name: 'stream-barcode-reader',
+  data() {
+    return {
+      msg: '',
+      histories: []
+    };
+  },
+  async mounted() {
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: true
+    });
+    this.$refs.scanner.srcObject = stream;
+    setInterval(() => {
+      const result = qr.decode(document.getElementById('video'));
+      if (!result) return;
+      this.msg = result.text;
+      this.histories.unshift(result.text);
+    }, 500);
+  },
+  methods: {
+    onDecode() {
+      this.msg = qr.decode(document.getElementById('video'));
     }
+  }
 };
 </script>
 
 <style scoped>
 video {
-    max-width: 100%;
-    max-height: 100%;
+  max-width: 100%;
+  max-height: 100%;
 }
+
 .scanner-container {
-    position: relative;
+  display: flex;
+  justify-content: center;
 }
 
 .overlay-element {
-    position: absolute;
-    top: 0;
-    width: 100%;
-    height: 99%;
-    background: rgba(30, 30, 30, 0.5);
+  position: absolute;
+  top: 0;
+  width: 100%;
+  height: 99%;
+  background: rgba(30, 30, 30, 0.5);
 
-    -webkit-clip-path: polygon(
-        0% 0%,
-        0% 100%,
-        20% 100%,
-        20% 20%,
-        80% 20%,
-        80% 80%,
-        20% 80%,
-        20% 100%,
-        100% 100%,
-        100% 0%
-    );
-    clip-path: polygon(
-        0% 0%,
-        0% 100%,
-        20% 100%,
-        20% 20%,
-        80% 20%,
-        80% 80%,
-        20% 80%,
-        20% 100%,
-        100% 100%,
-        100% 0%
-    );
+  -webkit-clip-path: polygon(
+      0% 0%,
+      0% 100%,
+      3% 100%,
+      3% 3%,
+      97% 3%,
+      97% 97%,
+      3% 97%,
+      3% 100%,
+      100% 100%,
+      100% 0%
+  );
+  clip-path: polygon(
+      0% 0%,
+      0% 100%,
+      3% 100%,
+      3% 3%,
+      97% 3%,
+      97% 97%,
+      3% 97%,
+      3% 100%,
+      100% 100%,
+      100% 0%
+  );
 }
 
 .laser {
-    width: 60%;
-    margin-left: 20%;
-    background-color: tomato;
-    height: 1px;
-    position: absolute;
-    top: 40%;
-    z-index: 2;
-    box-shadow: 0 0 4px red;
-    -webkit-animation: scanning 2s infinite;
-    animation: scanning 2s infinite;
+  width: 94%;
+  margin-left: 3%;
+  background-color: tomato;
+  height: 1px;
+  position: absolute;
+  top: 40%;
+  z-index: 2;
+  box-shadow: 0 0 4px red;
+  -webkit-animation: scanning 2s infinite;
+  animation: scanning 2s infinite;
 }
+
 @-webkit-keyframes scanning {
-    50% {
-        -webkit-transform: translateY(75px);
-        transform: translateY(75px);
-    }
+  50% {
+    -webkit-transform: translateY(75px);
+    transform: translateY(75px);
+  }
 }
+
 @keyframes scanning {
-    50% {
-        -webkit-transform: translateY(75px);
-        transform: translateY(75px);
-    }
+  50% {
+    -webkit-transform: translateY(75px);
+    transform: translateY(75px);
+  }
 }
 </style>
