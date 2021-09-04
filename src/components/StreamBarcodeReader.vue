@@ -28,7 +28,11 @@ export default {
   },
   async mounted() {
     const stream = await navigator.mediaDevices.getUserMedia({
-      video: true
+      video: {
+        facingMode: {
+          ideal: 'environment'
+        }
+      }
     });
     this.$refs.scanner.srcObject = stream;
     setInterval(() => {
