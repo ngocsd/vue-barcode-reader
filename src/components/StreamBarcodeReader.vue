@@ -1,17 +1,15 @@
 <template>
   <div>
     <div class="scanner-container">
-      <div style="position: relative">
+      <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
-        <div class="overlay-element"></div>
+        <!--        <div class="overlay-element"></div>-->
         <div class="laser"></div>
       </div>
     </div>
-    {{ msg }}<br>
-    histories:
-    <ul>
-      <li v-for="item of histories"> {{ item }}</li>
-    </ul>
+    <button @click="onSnap()" style="position: fixed"> snap</button>
+    <img ref="img1">
+    <img ref="img2" style="margin-left: 1em">
   </div>
 </template>
 
@@ -22,29 +20,28 @@ export default {
   name: 'stream-barcode-reader',
   data() {
     return {
-      msg: '',
-      histories: []
+      img: '',
+      histories: [],
+      stream: null
     };
   },
   async mounted() {
-    const stream = await navigator.mediaDevices.getUserMedia({
+    this.stream = await navigator.mediaDevices.getUserMedia({
       video: {
         facingMode: {
           ideal: 'environment'
         }
       }
     });
-    this.$refs.scanner.srcObject = stream;
-    setInterval(() => {
-      const result = qr.decode(document.getElementById('video'));
-      if (!result) return;
-      this.msg = result.text;
-      this.histories.unshift(result.text);
-    }, 500);
+    this.$refs.scanner.srcObject = this.stream;
   },
   methods: {
-    onDecode() {
-      this.msg = qr.decode(document.getElementById('video'));
+    async onSnap() {
+      const data = qr.decode(this.$refs.scanner, [this.$refs.img1, this.$refs.img2]);
+      if (data) {
+        // context.drawImage(binaryBitmap, 0, 0, canvas.width, canvas.height);
+        console.log(data);
+      }
     }
   }
 };
@@ -56,6 +53,10 @@ video {
   max-height: 100%;
 }
 
+.camera {
+  position: relative;
+}
+
 .scanner-container {
   display: flex;
   justify-content: center;
@@ -65,7 +66,7 @@ video {
   position: absolute;
   top: 0;
   width: 100%;
-  height: 99%;
+  height: 100%;
   background: rgba(30, 30, 30, 0.5);
 
   -webkit-clip-path: polygon(
@@ -81,9 +82,9 @@ video {
       100% 0%
   );
   clip-path: polygon(
-      0% 0%,
-      0% 100%,
-      3% 100%,
+      0 0,
+      0 100%,
+      100px 100px,
       3% 3%,
       97% 3%,
       97% 97%,
@@ -95,16 +96,16 @@ video {
 }
 
 .laser {
-  width: 94%;
-  margin-left: 3%;
+  width: 1px;
+  margin-left: calc(50% - 1px);
   background-color: tomato;
-  height: 1px;
+  height: 100%;
   position: absolute;
-  top: 40%;
+  top: 0px;
   z-index: 2;
   box-shadow: 0 0 4px red;
-  -webkit-animation: scanning 2s infinite;
-  animation: scanning 2s infinite;
+  /*-webkit-animation: scanning 2s infinite;*/
+  /*animation: scanning 2s infinite;*/
 }
 
 @-webkit-keyframes scanning {
