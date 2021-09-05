@@ -129,21 +129,25 @@ class Decoder {
       ctx.drawImage(mediaElement, 0, 0);
       let canvas = this.getCaptureCanvas(mediaElement);
       const result = this.dd(canvas);
+      let data;
       if (result) {
         this.drawResult(ctx, result.getResultPoints())
+        data = this.getData(result);
       }
       imgs[0].src = canvas.toDataURL();
 
-      ctx.drawImage(mediaElement, 320, 0, 500, 1000, 0, 0, 500, 1000);
+      ctx.drawImage(mediaElement, 320, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
       canvas = this.getCaptureCanvas(mediaElement);
       imgs[1].src = canvas.toDataURL();
       const result2 = this.dd(canvas);
+      let data2
       if (result2) {
         this.drawResult(ctx, result2.getResultPoints())
+        data2 = this.getData(result2);
       }
       imgs[1].src = canvas.toDataURL();
       // const data = this.getData(result);
-      return [result, result2];
+      return [data, data2];
     } catch (err) {
       if (err.name !== 'NotFoundException') {
         console.error(err);

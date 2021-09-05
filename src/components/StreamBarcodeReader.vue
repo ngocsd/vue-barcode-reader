@@ -7,7 +7,9 @@
         <div class="laser"></div>
       </div>
     </div>
-    <button @click="onSnap()" style="position: fixed"> snap</button>
+    <button @click="onSnap()" class="button"> snap</button>
+    {{ msgs }}
+    <hr>
     <img ref="img1">
     <img ref="img2" style="margin-left: 1em">
   </div>
@@ -20,7 +22,7 @@ export default {
   name: 'stream-barcode-reader',
   data() {
     return {
-      img: '',
+      msgs: '',
       histories: [],
       stream: null
     };
@@ -28,6 +30,8 @@ export default {
   async mounted() {
     this.stream = await navigator.mediaDevices.getUserMedia({
       video: {
+        width: 640,
+        height: 480,
         facingMode: {
           ideal: 'environment'
         }
@@ -38,10 +42,8 @@ export default {
   methods: {
     async onSnap() {
       const data = qr.decode(this.$refs.scanner, [this.$refs.img1, this.$refs.img2]);
-      if (data) {
-        // context.drawImage(binaryBitmap, 0, 0, canvas.width, canvas.height);
-        console.log(data);
-      }
+      this.msgs = data.map(item => item?.text)
+      console.log(data);
     }
   }
 };
@@ -55,6 +57,10 @@ video {
 
 .camera {
   position: relative;
+}
+.button {
+  position: fixed;
+  top: 5%;
 }
 
 .scanner-container {
