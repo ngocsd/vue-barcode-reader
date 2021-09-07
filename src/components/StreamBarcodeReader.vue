@@ -30,8 +30,8 @@ export default {
   async mounted() {
     this.stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        width: 640,
-        height: 480,
+        width: 1920,
+        height: 1080,
         facingMode: {
           ideal: 'environment'
         }
