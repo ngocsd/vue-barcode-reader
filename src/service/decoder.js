@@ -14,7 +14,7 @@ class Decoder {
   captureCanvas;
   isVertical;
 
-  createCaptureCanvas(mediaElement) {
+  createCaptureCanvas(mediaElement, total) {
 
     if (typeof document === 'undefined') {
       return null;
@@ -36,7 +36,7 @@ class Decoder {
     }
 
     this.isVertical = height > width;
-    // width /= 2;
+    width /= total;
     canvasElement.style.width = width + 'px';
     canvasElement.style.height = height + 'px';
     canvasElement.width = width;
@@ -67,13 +67,14 @@ class Decoder {
   }
 
   drawImageOnCanvas(srcElement, total, index) {
-    const width = srcElement.videoWidth / total;
-    const height = srcElement.videoHeight;
+    const canvasElement = this.createCaptureCanvas(srcElement, total);
+    const width = canvasElement.width;
+    const height = canvasElement.height;
     const xSrc = width * index;
-    this.getCaptureCanvasContext(srcElement).drawImage(srcElement, xSrc, 0, width, height, 0, 0, width, height);
-    // const img = document.createElement('img');
-    // img.src = this.getCaptureCanvas().toDataURL();
-    // document.body.appendChild(img);
+
+    const ctx = canvasElement.getContext('2d');
+    ctx.drawImage(srcElement, xSrc, 0, width, height, 0, 0, width, height);
+    return canvasElement;
   }
 
   createBinaryBitmap(canvas) {
@@ -107,12 +108,20 @@ class Decoder {
     ctx.fillRect(x - 10, y - 10, 20, 20);
   }
 
-  drawResult(ctx, points) {
-    ctx.beginPath();
-    ctx.fillStyle = '#FF0000';
-    for (const point of points) {
-      this.drawPoint(ctx, point);
+  drawResult(canvas, points) {
+    if (!canvas) return;
+    if (points) {
+      const ctx = canvas.getContext('2d');
+      ctx.beginPath();
+      ctx.fillStyle = '#FF0000';
+      for (const point of points) {
+        this.drawPoint(ctx, point);
+      }
     }
+    const img = document.createElement('img');
+    img.style.marginRight = '0.3rem';
+    img.src = canvas.toDataURL();
+    document.body.appendChild(img);
   }
 
   dd(canvas) {
@@ -128,19 +137,23 @@ class Decoder {
   }
 
   decodeImage(mediaElement, total = 2) {
-    const result = [];
+    const results = [];
     for (let i = 0; i < total; i++) {
-      this.drawImageOnCanvas(mediaElement, total, i);
-      result.push(this.dd(this.getCaptureCanvas(mediaElement)));
+      const canvas = this.drawImageOnCanvas(mediaElement, total, i);
+      const decodedResult = this.dd(canvas);
+      results.push(this.dd(canvas));
+      this.drawResult(canvas, decodedResult?.getResultPoints());
     }
-    return result;
+    return results.filter(item => !!item);
   }
 
   decode(mediaElement) {
     try {
-      const divide2 = this.decodeImage(mediaElement, 2);
-      const divide3 = this.decodeImage(mediaElement, 3);
-      return divide2.concat(divide3).filter(item => !!item).map(this.getData);
+      let result = this.decodeImage(mediaElement, 3);
+      if (result.length === 0) {
+        result = this.decodeImage(mediaElement, 2);
+      }
+      return result.map(this.getData);
     } catch (err) {
       if (err.name !== 'NotFoundException') {
         console.error(err);

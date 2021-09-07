@@ -12,8 +12,6 @@
     <button @click="onSnap()" class="button"> snap</button>
     {{ msgs }}
     <hr>
-    <img ref="img1">
-    <img ref="img2" style="margin-left: 1em">
   </div>
 </template>
 
@@ -43,6 +41,7 @@ export default {
   },
   methods: {
     async onSnap() {
+      Array.from(document.querySelectorAll('img')).forEach(item => item.remove())
       const data = qr.decode(this.$refs.scanner);
       this.msgs = data.map(item => item?.text)
       console.log(data);
