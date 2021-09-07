@@ -11,11 +11,6 @@ export default {
   name: 'App',
   components: {
     StreamBarcodeReader
-  },
-  methods: {
-    onDecode(...rest) {
-      console.log(rest)
-    }
   }
 };
 </script>

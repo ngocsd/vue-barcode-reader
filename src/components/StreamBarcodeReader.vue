@@ -4,7 +4,9 @@
       <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
         <!--        <div class="overlay-element"></div>-->
-        <div class="laser"></div>
+        <div class="laser center" />
+        <div class="laser left" />
+        <div class="laser right" />
       </div>
     </div>
     <button @click="onSnap()" class="button"> snap</button>
@@ -41,7 +43,7 @@ export default {
   },
   methods: {
     async onSnap() {
-      const data = qr.decode(this.$refs.scanner, [this.$refs.img1, this.$refs.img2]);
+      const data = qr.decode(this.$refs.scanner);
       this.msgs = data.map(item => item?.text)
       console.log(data);
     }
@@ -102,16 +104,30 @@ video {
 }
 
 .laser {
-  width: 1px;
-  margin-left: calc(50% - 1px);
-  background-color: tomato;
-  height: 100%;
+  width: 2px;
   position: absolute;
-  top: 0px;
   z-index: 2;
-  box-shadow: 0 0 4px red;
   /*-webkit-animation: scanning 2s infinite;*/
   /*animation: scanning 2s infinite;*/
+}
+
+.laser.center {
+  margin-left: calc(50% - 1px);
+  background-color: tomato;
+  height: 49%;
+  top: calc(51%/2);
+}
+.laser.left {
+  margin-left: calc(100%/3 - 1px);
+  background-color: yellow;
+  height: 33%;
+  top: calc(67%/2);
+}
+.laser.right {
+  margin-left: calc(100%/3*2 - 1px);
+  background-color: yellow;
+  height: 33%;
+  top: calc(67%/2);
 }
 
 @-webkit-keyframes scanning {

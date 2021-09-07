@@ -36,7 +36,7 @@ class Decoder {
     }
 
     this.isVertical = height > width;
-    width /= 2;
+    // width /= 2;
     canvasElement.style.width = width + 'px';
     canvasElement.style.height = height + 'px';
     canvasElement.width = width;
@@ -66,8 +66,14 @@ class Decoder {
     return this.captureCanvasContext;
   }
 
-  drawImageOnCanvas(srcElement) {
-    this.getCaptureCanvasContext().drawImage(srcElement, 0, 0);
+  drawImageOnCanvas(srcElement, total, index) {
+    const width = srcElement.videoWidth / total;
+    const height = srcElement.videoHeight;
+    const xSrc = width * index;
+    this.getCaptureCanvasContext(srcElement).drawImage(srcElement, xSrc, 0, width, height, 0, 0, width, height);
+    // const img = document.createElement('img');
+    // img.src = this.getCaptureCanvas().toDataURL();
+    // document.body.appendChild(img);
   }
 
   createBinaryBitmap(canvas) {
@@ -98,14 +104,14 @@ class Decoder {
   }
 
   drawPoint(ctx, {x, y}) {
-    ctx.fillRect(x-10, y-10, 20, 20)
+    ctx.fillRect(x - 10, y - 10, 20, 20);
   }
 
   drawResult(ctx, points) {
     ctx.beginPath();
     ctx.fillStyle = '#FF0000';
-    for(const point of points) {
-      this.drawPoint(ctx, point)
+    for (const point of points) {
+      this.drawPoint(ctx, point);
     }
   }
 
@@ -116,38 +122,25 @@ class Decoder {
       hints.set(DecodeHintType.ALLOWED_LENGTHS, true);
       hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
       return this.reader.decode(this.createBinaryBitmap(canvas), hints);
-    } catch {
-
+    } catch (e) {
+      console.log(e);
     }
   }
 
-  decode(mediaElement, imgs) {
+  decodeImage(mediaElement, total = 2) {
+    const result = [];
+    for (let i = 0; i < total; i++) {
+      this.drawImageOnCanvas(mediaElement, total, i);
+      result.push(this.dd(this.getCaptureCanvas(mediaElement)));
+    }
+    return result;
+  }
+
+  decode(mediaElement) {
     try {
-
-      const ctx = this.getCaptureCanvasContext(mediaElement);
-      // this.drawImageOnCanvas(ctx, mediaElement);
-      ctx.drawImage(mediaElement, 0, 0);
-      let canvas = this.getCaptureCanvas(mediaElement);
-      const result = this.dd(canvas);
-      let data;
-      if (result) {
-        this.drawResult(ctx, result.getResultPoints())
-        data = this.getData(result);
-      }
-      imgs[0].src = canvas.toDataURL();
-
-      ctx.drawImage(mediaElement, 320, 0, canvas.width, canvas.height, 0, 0, canvas.width, canvas.height);
-      canvas = this.getCaptureCanvas(mediaElement);
-      imgs[1].src = canvas.toDataURL();
-      const result2 = this.dd(canvas);
-      let data2
-      if (result2) {
-        this.drawResult(ctx, result2.getResultPoints())
-        data2 = this.getData(result2);
-      }
-      imgs[1].src = canvas.toDataURL();
-      // const data = this.getData(result);
-      return [data, data2];
+      const divide2 = this.decodeImage(mediaElement, 2);
+      const divide3 = this.decodeImage(mediaElement, 3);
+      return divide2.concat(divide3).filter(item => !!item).map(this.getData);
     } catch (err) {
       if (err.name !== 'NotFoundException') {
         console.error(err);
