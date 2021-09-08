@@ -10,6 +10,7 @@
       </div>
     </div>
     <button @click="onSnap()" class="button"> snap</button>
+    <input type="text" :value="pattenStr">
     {{ msgs }}
     <hr>
   </div>
@@ -23,6 +24,7 @@ export default {
   data() {
     return {
       msgs: '',
+      pattenStr: '0-50;  50-100;   25-75;',
       histories: [],
       stream: null
     };
@@ -39,10 +41,18 @@ export default {
     });
     this.$refs.scanner.srcObject = this.stream;
   },
+  computed: {
+    pattern() {
+      return this.pattenStr.split(';').map(str => {
+        return str.trim().split('-').map(val => Number(val))
+      })
+    }
+  },
   methods: {
     async onSnap() {
       Array.from(document.querySelectorAll('img')).forEach(item => item.remove())
-      const data = qr.decode(this.$refs.scanner);
+      console.log(this.pattern);
+      const data = qr.decode(this.$refs.scanner, this.pattern);
       this.msgs = data.map(item => item?.text)
       console.log(data);
     }

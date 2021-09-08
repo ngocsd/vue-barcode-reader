@@ -14,7 +14,7 @@ class Decoder {
   captureCanvas;
   isVertical;
 
-  createCaptureCanvas(mediaElement, total) {
+  createCaptureCanvas(mediaElement, canvasPercent) {
 
     if (typeof document === 'undefined') {
       return null;
@@ -36,7 +36,7 @@ class Decoder {
     }
 
     this.isVertical = height > width;
-    width /= total;
+    width *= canvasPercent;
     canvasElement.style.width = width + 'px';
     canvasElement.style.height = height + 'px';
     canvasElement.width = width;
@@ -66,11 +66,12 @@ class Decoder {
     return this.captureCanvasContext;
   }
 
-  drawImageOnCanvas(srcElement, total, index) {
-    const canvasElement = this.createCaptureCanvas(srcElement, total);
+  drawImageOnCanvas(srcElement, pattern = [0, 50]) {
+    const canvasPercent = (pattern[1] - pattern[0])/100
+    const canvasElement = this.createCaptureCanvas(srcElement, canvasPercent);
     const width = canvasElement.width;
     const height = canvasElement.height;
-    const xSrc = width * index;
+    const xSrc = srcElement.videoWidth * pattern[0]/100;
 
     const ctx = canvasElement.getContext('2d');
     ctx.drawImage(srcElement, xSrc, 0, width, height, 0, 0, width, height);
@@ -120,6 +121,7 @@ class Decoder {
     }
     const img = document.createElement('img');
     img.style.marginRight = '0.3rem';
+    img.style.width = '30vw';
     img.src = canvas.toDataURL();
     document.body.appendChild(img);
   }
@@ -136,23 +138,20 @@ class Decoder {
     }
   }
 
-  decodeImage(mediaElement, total = 2) {
+  decodeImage(mediaElement, patterns) {
     const results = [];
-    for (let i = 0; i < total; i++) {
-      const canvas = this.drawImageOnCanvas(mediaElement, total, i);
+    for (const pattern of patterns) {
+      const canvas = this.drawImageOnCanvas(mediaElement, pattern);
       const decodedResult = this.dd(canvas);
-      results.push(this.dd(canvas));
+      results.push(decodedResult);
       this.drawResult(canvas, decodedResult?.getResultPoints());
     }
     return results.filter(item => !!item);
   }
 
-  decode(mediaElement) {
+  decode(mediaElement, patterns) {
     try {
-      let result = this.decodeImage(mediaElement, 3);
-      if (result.length === 0) {
-        result = this.decodeImage(mediaElement, 2);
-      }
+      let result = this.decodeImage(mediaElement, patterns);
       return result.map(this.getData);
     } catch (err) {
       if (err.name !== 'NotFoundException') {
