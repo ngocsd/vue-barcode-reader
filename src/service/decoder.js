@@ -144,7 +144,7 @@ class Decoder {
       const canvas = this.drawImageOnCanvas(mediaElement, pattern);
       const decodedResult = this.dd(canvas);
       results.push(decodedResult);
-      this.drawResult(canvas, decodedResult?.getResultPoints());
+      // this.drawResult(canvas, decodedResult?.getResultPoints());
     }
     return results.filter(item => !!item);
   }

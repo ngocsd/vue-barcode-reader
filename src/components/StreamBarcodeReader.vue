@@ -4,13 +4,13 @@
       <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
         <!--        <div class="overlay-element"></div>-->
-        <div class="laser center" />
-        <div class="laser left" />
-        <div class="laser right" />
+        <div class="laser center"/>
+        <div class="laser left"/>
+        <div class="laser right"/>
       </div>
     </div>
     <button @click="onSnap()" class="button"> snap</button>
-    <input type="text" :value="pattenStr">
+    <input type="text" v-model="pattenStr">
     {{ msgs }}
     <hr>
   </div>
@@ -23,10 +23,11 @@ export default {
   name: 'stream-barcode-reader',
   data() {
     return {
-      msgs: '',
+      msgs: [],
       pattenStr: '0-50;  50-100;   25-75;',
       histories: [],
-      stream: null
+      stream: null,
+      interval: null
     };
   },
   async mounted() {
@@ -44,17 +45,23 @@ export default {
   computed: {
     pattern() {
       return this.pattenStr.split(';').map(str => {
-        return str.trim().split('-').map(val => Number(val))
-      })
+        return str.trim().split('-').map(val => Number(val));
+      });
     }
   },
   methods: {
     async onSnap() {
-      Array.from(document.querySelectorAll('img')).forEach(item => item.remove())
-      console.log(this.pattern);
-      const data = qr.decode(this.$refs.scanner, this.pattern);
-      this.msgs = data.map(item => item?.text)
-      console.log(data);
+      // Array.from(document.querySelectorAll('img')).forEach(item => item.remove())
+      // console.log(this.pattern);
+      if (this.interval) {
+        clearInterval(this.interval);
+        this.msgs = []
+      }
+      const $this = this;
+      this.interval = setInterval(() => {
+        const data = qr.decode(this.$refs.scanner, this.pattern);
+        $this.msgs.push(...data.map(item => item?.text).filter(item => !this.msgs.includes(item)));
+      }, 200);
     }
   }
 };
@@ -69,6 +76,7 @@ video {
 .camera {
   position: relative;
 }
+
 .button {
   position: fixed;
   top: 5%;
@@ -124,19 +132,21 @@ video {
   margin-left: calc(50% - 1px);
   background-color: tomato;
   height: 49%;
-  top: calc(51%/2);
+  top: calc(51% / 2);
 }
+
 .laser.left {
-  margin-left: calc(100%/3 - 1px);
+  margin-left: calc(100% / 3 - 1px);
   background-color: yellow;
   height: 33%;
-  top: calc(67%/2);
+  top: calc(67% / 2);
 }
+
 .laser.right {
-  margin-left: calc(100%/3*2 - 1px);
+  margin-left: calc(100% / 3 * 2 - 1px);
   background-color: yellow;
   height: 33%;
-  top: calc(67%/2);
+  top: calc(67% / 2);
 }
 
 @-webkit-keyframes scanning {
