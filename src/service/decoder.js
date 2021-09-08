@@ -134,7 +134,6 @@ class Decoder {
       hints.set(DecodeHintType.POSSIBLE_FORMATS, [BarcodeFormat.QR_CODE]);
       return this.reader.decode(this.createBinaryBitmap(canvas), hints);
     } catch (e) {
-      console.log(e);
     }
   }
 

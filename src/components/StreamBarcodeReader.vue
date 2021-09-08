@@ -3,7 +3,7 @@
     <div class="scanner-container">
       <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
-        <!--        <div class="overlay-element"></div>-->
+        <div class="overlay-element"/>
         <div class="laser center"/>
         <div class="laser left"/>
         <div class="laser right"/>
@@ -11,8 +11,13 @@
     </div>
     <button @click="onSnap()" class="button"> snap</button>
     <input type="text" v-model="pattenStr">
-    {{ msgs }}
     <hr>
+    <!--    <p :key="key">{{ msgs }}</p>-->
+    <ul :key="JSON.stringify(msgs)">
+      <li v-for="item of msgs" :key="key">
+        {{ JSON.stringify(item) }}
+      </li>
+    </ul>
   </div>
 </template>
 
@@ -23,8 +28,9 @@ export default {
   name: 'stream-barcode-reader',
   data() {
     return {
-      msgs: [],
-      pattenStr: '0-50;  50-100;   25-75;',
+      key: 0,
+      msgs: {a1: 'test data'},
+      pattenStr: '0-50;  50-100;   25-75;  35-64;',
       histories: [],
       stream: null,
       interval: null
@@ -44,9 +50,9 @@ export default {
   },
   computed: {
     pattern() {
-      return this.pattenStr.split(';').map(str => {
-        return str.trim().split('-').map(val => Number(val));
-      });
+      return this.pattenStr.split(';')
+          .filter(item => !!item)
+          .map(str => str.trim().split('-').map(val => Number(val)));
     }
   },
   methods: {
@@ -55,12 +61,21 @@ export default {
       // console.log(this.pattern);
       if (this.interval) {
         clearInterval(this.interval);
-        this.msgs = []
+        this.msgs = {a2: 'test'};
       }
       const $this = this;
       this.interval = setInterval(() => {
         const data = qr.decode(this.$refs.scanner, this.pattern);
-        $this.msgs.push(...data.map(item => item?.text).filter(item => !this.msgs.includes(item)));
+        for (const d of data) {
+          if (!$this.msgs[d.parity]) {
+            $this.msgs[d.parity] = [];
+          }
+          const p = $this.msgs[d.parity];
+          if (!p[d.splitIndex]) {
+            p[d.splitIndex] = d.text;
+            $this.key++;
+          }
+        }
       }, 200);
     }
   }
@@ -93,31 +108,32 @@ video {
   width: 100%;
   height: 100%;
   background: rgba(30, 30, 30, 0.5);
+  box-sizing: border-box;
 
   -webkit-clip-path: polygon(
       0% 0%,
       0% 100%,
-      3% 100%,
-      3% 3%,
-      97% 3%,
-      97% 97%,
-      3% 97%,
-      3% 100%,
+      36% 67%,
+      36% 33%,
+      63% 33%,
+      63% 67%,
+      0% 67%,
+      0% 100%,
       100% 100%,
       100% 0%
   );
   clip-path: polygon(
-      0 0,
-      0 100%,
-      100px 100px,
-      3% 3%,
-      97% 3%,
-      97% 97%,
-      3% 97%,
-      3% 100%,
+      0% 0%,
+      0% 100%,
+      36% 67%,
+      36% 33%,
+      63% 33%,
+      63% 67%,
+      0% 67%,
+      0% 100%,
       100% 100%,
       100% 0%
-  );
+  )
 }
 
 .laser {
