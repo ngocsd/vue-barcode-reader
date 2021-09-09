@@ -12,7 +12,6 @@
     <button @click="onSnap()" class="button"> snap</button>
     <input type="text" v-model="pattenStr">
     <hr>
-    <!--    <p :key="key">{{ msgs }}</p>-->
     <ul :key="JSON.stringify(msgs)">
       <li v-for="item of msgs" :key="key">
         {{ JSON.stringify(item) }}
@@ -90,6 +89,8 @@ video {
 
 .camera {
   position: relative;
+  max-width: 90vh;
+  max-height: 90vw;
 }
 
 .button {
