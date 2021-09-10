@@ -4,16 +4,15 @@
       <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
         <div class="overlay-element"/>
-        <div class="laser center"/>
-        <div class="laser left"/>
-        <div class="laser right"/>
+      </div>
+      <div class="fixed">
+        <button @click="onSnap()"> snap</button>
+        <input type="text" v-model="pattenStr">
       </div>
     </div>
-    <button @click="onSnap()" class="button"> snap</button>
-    <input type="text" v-model="pattenStr">
     <hr>
-    <ul :key="JSON.stringify(msgs)">
-      <li v-for="item of msgs" :key="key">
+    <ul :key="key">
+      <li v-for="item in msgs" :key="key">
         {{ JSON.stringify(item) }}
       </li>
     </ul>
@@ -28,8 +27,8 @@ export default {
   data() {
     return {
       key: 0,
-      msgs: {a1: 'test data'},
-      pattenStr: '0-50;  50-100;   25-75;  35-64;',
+      msgs: {},
+      pattenStr: '10-50;  50-90; 35-75; 40-70;',
       histories: [],
       stream: null,
       interval: null
@@ -60,7 +59,7 @@ export default {
       // console.log(this.pattern);
       if (this.interval) {
         clearInterval(this.interval);
-        this.msgs = {a2: 'test'};
+        this.msgs = {};
       }
       const $this = this;
       this.interval = setInterval(() => {
@@ -75,7 +74,7 @@ export default {
             $this.key++;
           }
         }
-      }, 200);
+      }, 50);
     }
   }
 };
@@ -83,17 +82,15 @@ export default {
 
 <style scoped>
 video {
-  max-width: 100%;
-  max-height: 100%;
+  max-width: 85vh;
+  max-height: 85vw;
 }
 
 .camera {
   position: relative;
-  max-width: 90vh;
-  max-height: 90vw;
 }
 
-.button {
+.fixed {
   position: fixed;
   top: 5%;
 }
@@ -108,16 +105,16 @@ video {
   top: 0;
   width: 100%;
   height: 100%;
-  background: rgba(30, 30, 30, 0.5);
+  background: rgba(30, 30, 30, 0.7);
   box-sizing: border-box;
 
   -webkit-clip-path: polygon(
       0% 0%,
       0% 100%,
-      36% 67%,
-      36% 33%,
-      63% 33%,
-      63% 67%,
+      10% 67%,
+      10% 33%,
+      90% 33%,
+      90% 67%,
       0% 67%,
       0% 100%,
       100% 100%,
@@ -126,10 +123,10 @@ video {
   clip-path: polygon(
       0% 0%,
       0% 100%,
-      36% 67%,
-      36% 33%,
-      63% 33%,
-      63% 67%,
+      10% 67%,
+      10% 33%,
+      90% 33%,
+      90% 67%,
       0% 67%,
       0% 100%,
       100% 100%,
