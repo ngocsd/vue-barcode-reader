@@ -1,8 +1,6 @@
 <template>
   <div id="app">
-    <StreamBarcodeReader
-        @decode="(a, b, c) => onDecode(a, b, c)"
-    />
+    <StreamBarcodeReader />
   </div>
 </template>
 
@@ -13,11 +11,6 @@ export default {
   name: 'App',
   components: {
     StreamBarcodeReader
-  },
-  methods: {
-    onDecode(...rest) {
-      console.log(rest)
-    }
   }
 };
 </script>
