@@ -4,6 +4,7 @@
       <div class="camera">
         <video poster="data:image/gif,AAAA" ref="scanner" autoplay playsinline muted id="video"/>
         <div class="overlay-element"/>
+        <div class="overlay-focus"/>
       </div>
       <div class="fixed">
         <button @click="onSnap()"> snap</button>
@@ -28,7 +29,7 @@ export default {
     return {
       key: 0,
       msgs: {},
-      pattenStr: '10-50;  50-90; 35-75; 40-70;',
+      pattenStr: '34-66; 39-61; 10-50;  50-90; 30-60; 38-68',
       histories: [],
       stream: null,
       interval: null
@@ -37,8 +38,8 @@ export default {
   async mounted() {
     this.stream = await navigator.mediaDevices.getUserMedia({
       video: {
-        width: 1024,
-        height: 1024,
+        width: 960,
+        height: 960,
         facingMode: {
           ideal: 'environment'
         }
@@ -132,6 +133,14 @@ video {
       100% 100%,
       100% 0%
   )
+}
+.overlay-focus {
+  position: absolute;
+  top: 34%;
+  left: 34%;
+  width: 32%;
+  height: 32%;
+  border: tomato dashed .2rem;
 }
 
 .laser {

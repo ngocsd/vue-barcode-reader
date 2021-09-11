@@ -37,6 +37,7 @@ class Decoder {
 
     this.isVertical = height > width;
     width *= canvasPercent;
+    height = height*34/100;
     canvasElement.style.width = width + 'px';
     canvasElement.style.height = height + 'px';
     canvasElement.width = width;
@@ -74,7 +75,8 @@ class Decoder {
     const xSrc = srcElement.videoWidth * pattern[0]/100;
 
     const ctx = canvasElement.getContext('2d');
-    ctx.drawImage(srcElement, xSrc, 0, width, height, 0, 0, width, height);
+    ctx.filter = 'grayscale(1)'
+    ctx.drawImage(srcElement, xSrc, srcElement.videoHeight *33/100, width, height, 0, 0, width, height);
     return canvasElement;
   }
 
